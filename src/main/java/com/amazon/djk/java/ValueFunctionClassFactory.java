@@ -62,7 +62,7 @@ public class ValueFunctionClassFactory {
             sysPropDotNames.add(dotName);            
         }
         
-        code.append("   public Object get(Record rec) throws IOException {\n");
+        code.append("   public Object get(com.amazon.djk.record.Record rec) throws IOException {\n");
 
         interpret(djkJavaRightHandSide, sysPropDotNames, code);
 

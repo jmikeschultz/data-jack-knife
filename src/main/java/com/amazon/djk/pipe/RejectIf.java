@@ -17,9 +17,9 @@ import com.amazon.djk.record.Value;
 import com.amazon.djk.report.PercentProgress;
 import com.amazon.djk.report.ReportFormats;
 import com.amazon.djk.report.ScalarProgress;
-import org.apache.logging.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 import java.io.IOException;
 
@@ -47,7 +47,7 @@ public class RejectIf extends RecordPipe implements Keyword {
     @PercentProgress(name = "percentAccepted", denominatorAnnotation = "inRecs")
     @ScalarProgress(name="accepted")
     private volatile long keptCount = 0;
-    
+
     private final Level logLevel;
 	
     public RejectIf(OpArgs args) throws IOException {
@@ -58,7 +58,8 @@ public class RejectIf extends RecordPipe implements Keyword {
         super(root);
     	this.args = args;
     	this.value = (Value)args.getArg("CONDITIONAL");
-    	logLevel = Level.toLevel((String)args.getParam("logEach"));
+        String levelStr = (String)args.getParam("logEach");
+        logLevel = levelStr.equals("OFF") ? null : Level.valueOf(levelStr);
     }
     
     @Override
@@ -83,11 +84,11 @@ public class RejectIf extends RecordPipe implements Keyword {
             if (rec == null) return null;
 
             inRecs++;
-        
+
             if (getConditional(rec)) {
                 skipCount++;
                 
-                if (!logLevel.equals(Level.OFF)) {
+                if (logLevel != null) {
                     log(rec);
                 }
                 continue;                
@@ -101,7 +102,7 @@ public class RejectIf extends RecordPipe implements Keyword {
     }
 
     private void log(Record record) {
-        switch (logLevel.getStandardLevel()) {
+        switch (logLevel) {
 
         case ERROR:
             logger.error(String.format("rejected record (%s) where (%s)", record, value.getDisplayString()));
@@ -113,7 +114,6 @@ public class RejectIf extends RecordPipe implements Keyword {
 
         default:
             logger.info(String.format("rejected record (%s) where (%s)", record, value.getDisplayString()));
-            return;
         }
     }
     

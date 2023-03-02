@@ -8,7 +8,6 @@ import com.amazon.djk.record.Record;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
