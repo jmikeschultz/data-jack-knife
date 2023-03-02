@@ -14,11 +14,10 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 usage() {
 KTMP="${KNIVES/$JACKKNIFE/$RED$BOLD$JACKKNIFE$OFF$BOLD}"
-echo -en $BOLD
+echo $BOLD
 echo "usage: djk source pipe(s) sink"
 echo "usage: djk source pipe(s) sink REDUCE pipe(s) sink"
-echo -e "usage: djk knife={$KTMP} sets the package of the JackKnife"
-echo -en $OFF
+echo $OFF
 }
 
 WHO=`whoami`
@@ -29,5 +28,9 @@ LOG_DIR="-Dlog.dir=/tmp"
 LOG="$LOG_DIR $RUNBY -Dlog4j.configurationFile=/Users/mike/Development/java/data-jack-knife/bin/log4j2.xml"
 
 GLOB="-Xms100M -Xmx100M -Dhostname=$HOSTNAME -DdisplayType=VT100 -DreportRefreshSecs=3 $LOG"
+
+if [[ "$1" == "" ]]; then
+    usage
+fi
 
 java -cp $SCRIPT_DIR/../target/data-jack-knife-1.0-SNAPSHOT-jar-with-dependencies.jar:$SCRIPT_DIR/slf4j-nop-2.0.6.jar $GLOB com.amazon.djk.processor.DataJackKnife "$@"
