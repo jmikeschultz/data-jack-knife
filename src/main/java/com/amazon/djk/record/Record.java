@@ -1,9 +1,7 @@
 package com.amazon.djk.record;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import com.amazon.djk.format.ReaderFormatParser;
 import com.amazon.djk.processor.FieldDefs;
@@ -150,8 +148,8 @@ public class Record extends RecordRead {
      * @return
      * @throws IOException
      */
-	public String getAsNV2(boolean withTypes) throws IOException {
-		return toString(this, 0, withTypes);		
+	public String getAsNV2(boolean withTypes, Map<String,String> prevDiffVals) throws IOException {
+		return toString(this, 0, withTypes, prevDiffVals);
 	}
 	
 	/**
@@ -160,13 +158,13 @@ public class Record extends RecordRead {
 	 * @throws IOException
 	 */
 	public String getAsNV2() throws IOException {
-		return getAsNV2(false);
+		return getAsNV2(false, null);
 	}
 
 	@Override
 	public String toString() {
 		try {
-			return getAsNV2(false);
+			return getAsNV2(false, null);
 		} catch (IOException e) {
 			return super.toString();
 		}
@@ -180,20 +178,27 @@ public class Record extends RecordRead {
 	 * @return
 	 * @throws IOException 
 	 */
-	private String toString(Record rec, int level, boolean withTypes) throws IOException {
-		//Fields fields = FDict.local().getCachedFields(level);
-		//StringBuilder sb = FDict.local().getCachedStringBuilder(level);
+	private String toString(Record rec, int level,
+                            boolean withTypes,
+                            Map<String,String> diffPrevVals) throws IOException {
 		FieldIterator fields = new FieldIterator();
 		StringBuilder sb = new StringBuilder();
+        Map<String,String> subDiffPrevVals = diffPrevVals == null ? null : new HashMap<>();
+        boolean isFirstDiff = diffPrevVals != null && diffPrevVals.isEmpty();
+
+        final char e = (char)27;
+        final String END_COLOR = e + "[0m";
+        final String RED_COLOR = e + "[1m" + e + "[31m";
 
 		fields.init(this);
 		while (fields.next()) {
-			sb.append(fields.getName());
+            String name = fields.getName();
+			sb.append(name);
 			sb.append(':');
 			if (fields.getType() == FieldType.RECORD) {
 				Record subrec = new Record();
 				fields.getValueAsRecord(subrec);
-				String[] lines = subrec.toString(this, level + 1, withTypes).split("\\n");
+				String[] lines = subrec.toString(this, level + 1, withTypes, subDiffPrevVals).split("\\n");
 				for (String line : lines) {
 					sb.append('\n');
 					sb.append('\t');
@@ -202,7 +207,17 @@ public class Record extends RecordRead {
 			}
 
 			else {
-				sb.append(fields.getValueAsString());
+                String val = fields.getValueAsString();
+                if (diffPrevVals != null) { // non-null means do the diff
+                    if (isFirstDiff) diffPrevVals.put(name, val); // so 1st one not diff from itself
+                    String prevVal = diffPrevVals.get(name);
+                    if (!val.equals(prevVal)) {
+                        diffPrevVals.put(name, val);
+                        val = RED_COLOR + val + END_COLOR;
+                    }
+                }
+
+				sb.append(val);
 				if (withTypes) {
 					sb.append(" [");
 					sb.append(fields.getType());

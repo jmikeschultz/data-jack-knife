@@ -18,14 +18,13 @@ public class NV2FormatWriter extends FormatWriter {
 	
 	@Override
 	public void writeRecord(Record rec) throws IOException {
-        writer.print(rec.getAsNV2(false));
+        writer.print(rec.getAsNV2(false, null));
         writer.println("#"); // end of record marker		
 	}
 	
 	@Override
 	public void close() throws IOException {
 		writer.close();
-		//super.close();
 	}
 	
 	
