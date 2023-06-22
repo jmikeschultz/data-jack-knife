@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.amazon.djk.pipe.FileBasedMacroOp;
 import org.apache.commons.io.FileUtils;
 
 import com.amazon.djk.core.RecordSource;
@@ -104,6 +105,13 @@ public class JackKnife extends InnerKnife {
     		emacsMode.create();
     		return null;
     	}
+
+		// look for *.djk chunks and replace them with macro:*.djk so we don't need the macro:
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].endsWith(".djk") && !args[i].startsWith(FileBasedMacroOp.MACRO + ':')) {
+				args[i] = FileBasedMacroOp.MACRO + ':' + args[i];
+			}
+		}
 
     	Expression expr = Expression.create(args);
 
