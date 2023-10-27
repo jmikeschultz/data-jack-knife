@@ -118,4 +118,13 @@ public class StatsHolder {
         }
     	return null;
     }
+
+
+    /**
+     *
+     */
+    public void reset() {
+        statsMap.clear();
+        numRecs.set(0);
+    }
 }

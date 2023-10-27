@@ -16,6 +16,7 @@ import java.util.List;
  */
 public class SourceListSource extends BaseRecordSource implements Splittable {
 	private final List<RecordSource> sources = new ArrayList<>();
+	private final List<RecordSource> spentSources = new ArrayList<>();
 	private RecordSource curr = null;
 
 	/**
@@ -49,6 +50,8 @@ public class SourceListSource extends BaseRecordSource implements Splittable {
 	public Record next() throws IOException {
 		Record rec = curr != null ? curr.next() : null;
 		while (rec == null) {
+			// about to assign a new curr
+			if (curr != null) spentSources.add(curr);
 			if (sources.isEmpty()) return null;
 			curr = sources.remove(sources.size()-1);
 			
@@ -83,7 +86,7 @@ public class SourceListSource extends BaseRecordSource implements Splittable {
 	
 	@Override
 	public void close() throws IOException {
-		for (RecordSource source : sources) {
+		for (RecordSource source : spentSources) {
 			source.close();
 		}
 	}

@@ -204,36 +204,8 @@ public class ExecutionContext implements ReportProvider {
      * @throws IOException
      */
     static void setKnifeProperties(Expression expr) throws IOException {
-        Namespace propertiesNamespace = ThreadDefs.get().getPropertiesNamespace();
-
-        List<JobProperty> properties = expr.getJobProperties();
-
-        // enumerate these
-        for (JobProperty prop : properties) {
-                // core properties look like knife properties. core props are handled in setSystemProperties
-			if (!CoreDefs.isCoreProperty(prop.nonNamespacedName)) {
-
-				String resolvedValue = KnifeProperties.setProperty(propertiesNamespace,
-						prop.nonNamespacedName,
-						prop.unresolvedValue);
-				LOG.info("setting system property namespace=" + propertiesNamespace + " name=" + prop.nonNamespacedName + " value=" + resolvedValue);
-					prop.setResolvedValue(resolvedValue);
-            }
-        }
+        setSystemProperties(expr);
     }
-
-    /**
-     * was used at one time.
-     *
-     * @throws IOException
-     *
-    static void resolveKniveProperties(Expression exp) throws IOException {
-    Map<String,ExpressionChunks> parts = exp.getParts();
-    Namespace propertiesNamespace = ThreadDefs.get().getPropertiesNamespace();
-    for (ExpressionChunks chunks : parts.values()) {
-    chunks.resolveProperties(propertiesNamespace);
-    }
-    }*/
 
     /**
      * @return
@@ -300,14 +272,14 @@ public class ExecutionContext implements ReportProvider {
      * @param exp
      * @throws IOException
      */
-    private void setSystemProperties(Expression exp) throws IOException {
+    private static void setSystemProperties(Expression exp) throws IOException {
         CoreDefs cdefs = CoreDefs.get();
         Namespace propertiesNamespace = cdefs.getPropertiesNamespace();
 
         // set system variables
-        for (JobProperty prop : expression.getJobProperties()) {
-            boolean propSet = cdefs.setCoreProperty(prop.nonNamespacedName, prop.unresolvedValue);
-            if (!propSet) { // not a core property, set namespaced properties
+        for (JobProperty prop : exp.getJobProperties()) {
+            boolean wasCorePropSet = cdefs.setCoreProperty(prop.nonNamespacedName, prop.unresolvedValue);
+            if (!wasCorePropSet) { // not a core property, set namespaced properties
             	String resolvedValue = KnifeProperties.setProperty(propertiesNamespace,
 						prop.nonNamespacedName,
 						prop.unresolvedValue);

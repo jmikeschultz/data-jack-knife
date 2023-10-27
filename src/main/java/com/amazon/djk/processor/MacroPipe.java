@@ -65,7 +65,14 @@ public final class MacroPipe extends RecordPipe {
     public static String getMacroString(List<String> rawMacroLines) {
         StringBuilder sb = new StringBuilder();
 
+		int endLen = CoreDefs.MACRO_END.length();
         for (String line : rawMacroLines) {
+			if (line.startsWith(CoreDefs.MACRO_END) &&
+ 				(line.length() == endLen || line.charAt(endLen) == ' ')) {
+				// if END alone on a line or beginning a line
+				return sb.toString();
+			}
+
             // everything after # is a comment
             int hash = line.indexOf('#');
             if (hash != -1) {

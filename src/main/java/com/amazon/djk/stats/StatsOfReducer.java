@@ -26,7 +26,7 @@ public class StatsOfReducer extends Reducer {
     private static final String MAX_POINTS = "maxPoints";
     private static final String MIN_COUNT = "minCount";
     private static final String DOUBLE_BIN = "doubleBin";
-    private static final String DEFAULT_MAX_POINTS = "10";
+    private static final String DEFAULT_MAX_POINTS = "-1";
     private static final String DEFAULT_MIN_COUNT = "1";
     private static final String DEFAULT_DOUBLE_BIN = "0.01";
     private static final String SUB_STATS_BY = "subStatsBy";
@@ -101,6 +101,7 @@ public class StatsOfReducer extends Reducer {
     @Override
     public boolean reset() {
         outrec.reset();
+        stats.reset();
         return true;
     }
 

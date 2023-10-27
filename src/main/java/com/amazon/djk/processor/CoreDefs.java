@@ -51,6 +51,7 @@ public class CoreDefs extends FieldDefs {
     public static final String FIELD_NAME_RULES = "fieldNameRules";
     private final static String REPORT_REFRESH_SECS = "reportRefreshSecs";
     public final static String DISPLAY_TYPE = "displayType";
+    public final static String MACRO_END = "END";
 
     public static class UnsetCoreDefs extends CoreDefs {
         @Override

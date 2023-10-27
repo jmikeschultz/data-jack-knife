@@ -13,21 +13,26 @@ OFF="\033[0m"
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 usage() {
-KTMP="${KNIVES/$JACKKNIFE/$RED$BOLD$JACKKNIFE$OFF$BOLD}"
-echo $BOLD
-echo "usage: djk source pipe(s) sink"
-echo "usage: djk source pipe(s) sink REDUCE pipe(s) sink"
-echo $OFF
+  KTMP="${KNIVES/$JACKKNIFE/$RED$BOLD$JACKKNIFE$OFF$BOLD}"
+  echo $BOLD
+  echo "usage: djk source pipe(s) sink"
+  echo "usage: djk source pipe(s) sink REDUCE pipe(s) sink"
+  echo $OFF
 }
 
 WHO=`whoami`
 RUNBY="-Drunby=$WHO"
 LOG_DIR="-Dlog.dir=/tmp"
 
+# Check if DJK_MEM_SIZE is set
+if [ -z "$DJK_NUM_MEGABYTES" ]; then
+    DJK_NUM_MEGABYTES="1000"
+fi
+
 # ${log.dir} and ${runby} used in djk-log4j.xml
 LOG="$LOG_DIR $RUNBY -Dlog4j.configurationFile=/Users/mike/Development/java/data-jack-knife/bin/log4j2.xml"
 
-GLOB="-Xms100M -Xmx100M -Dhostname=$HOSTNAME -DdisplayType=VT100 -DreportRefreshSecs=3 $LOG"
+GLOB="-Xms${DJK_NUM_MEGABYTES}M -Xmx${DJK_NUM_MEGABYTES}M -Dhostname=$HOSTNAME -DdisplayType=VT100 -DreportRefreshSecs=3 $LOG"
 
 if [[ "$1" == "" ]]; then
     usage

@@ -15,9 +15,10 @@ import com.amazon.djk.manual.Description;
 import com.amazon.djk.manual.Example;
 import com.amazon.djk.manual.ExampleType;
 
-@Description(text={"Creates a macro pipe from a text file.  Ignores lines beginning with #.",
-        "Lines are automatically wrapped (i.e. no need for \\ at the end of lines like bash)",
-        "?'s within the macro expression will be instantiated with operands on the stack."},
+@Description(text={"Creates a macro pipe from a text file.  Ignores everything after a '#'",
+        "within a line.  Lines are automatically wrapped (i.e. no need for \\",
+        "?'s in the macro expression will be instantiated with operands on the stack.",
+        "For debugging, an 'END' at the beginning of a line defines the end of the macro."},
         preLines={ "if 'mymacro.djk' contains the line: '? join:left'",
                    "",
                    "djk [ foo:bar,bob:cob ] [ foo:bar,num:38 ] map:foo macro:mymacro.djk",
