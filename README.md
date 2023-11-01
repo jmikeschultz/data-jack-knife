@@ -1,23 +1,23 @@
-## Data Jack Knife
+# Data Jack Knife
 
-Third-party dependencies:
-Slf4j - MIT license
-JakartaCommons-lang - Apache License, Version 2.0
-JakartaCommons-IO - Apache License, Version 2.0
-JakartaCommons-compress - Apache License, Version 2.0
-GoogleGuava - Apache License, Version 2.0
+### Third-party dependencies:
+- Slf4j - MIT license
+- JakartaCommons-lang - Apache License, Version 2.0
+- JakartaCommons-IO - Apache License, Version 2.0
+- JakartaCommons-compress - Apache License, Version 2.0
+- GoogleGuava - Apache License, Version 2.0
 
-It is a generic ETL-like record processor. There are record sources, pipes and sinks. The command line tool works like unix tools, using a simple post-fix syntax, but it is multi-threaded and better suited for pretty-big data, in the 1TB or less domain. In the future, there are AWS sources and sinks for exchanging data with AWS services.
+### Background
+
+DJK is a generic ETL-like record processor. There are record sources, pipes and sinks. The command line tool works like unix tools, using a simple post-fix syntax, but it is multi-threaded and better suited for pretty-big data, in the 1TB or less domain. In the future, there are AWS sources and sinks for exchanging data with AWS services.
 
 The value is two fold. Firstly, since it is a generally useful too for manipulating data. Secondly, since over time we will make available AWS sources and Sinks, it promotes using AWS and provides command line simplicity to utilizing AWS resources.
-
-Background
 
 DJK was never a fully-funded project at Amazon.  It grew out of frustration with the lack of support for writing inner loop search and indexing code.  At the time, I was working on project where the data to be indexed lived in a hidden database and there was a publishing service that wrote to a search service.  The accepted development workflow was to start up a dev publisher, push new code to an indexer, and attach a debugger.  This was so alien and lame to me, that it motivated me to put together a framework for accessing data from anywhere, process it, and send it anywhere. Using DJK I could develop index and query time code on my laptop both inside a single application.
 
 DJK is a ETL like processing framework, written in java.  It's main abstractions are Records, and Record Sources, Pipes for transforming data, and Sinks as data endpoint.  The first sinks were a solr indexer and querier along with ones for writing to local disk.
 
-Philosophy
+### Philosophy
 
 Although I wrote DJK for personal use, I always tried to keep two people in mind while implementing it: the end user, and developers implementing components.  That mindset, lead me to design decision and an overall philosophy that I think are the reason DJK was a succesful part so many projects.
 
@@ -27,8 +27,9 @@ Although I wrote DJK for personal use, I always tried to keep two people in mind
 * Documentation should be built in to the framework.  To the implementor, the overhead to document their component should be small.  To this end there is support for live djk example commands.  Instead of written documentation that gets out of sync with the software, built in documentation is always in sync, and the live examples need to run or the software won't build. 
 * It should be easy to instrument components.  The framework itself instruments the read and write queues that marshall data among components, but component implementors have support through simple annotations that make custom instrumentation trivial, again, even in a multi-threaded environment.
 
-DJK main man page:
+### DJK main man page:
 
+```
 $ djk 
 
 keywords:
@@ -113,11 +114,66 @@ misc:
 Declarations        	DJK is schema-less but you can declare fields to b
 VALUE               	The VALUE type uses a java-like syntax for accessi
 Properties          	Properties allow you to define STRINGS for replace
+```
+### Hello World!
+```
+$ djk [ id:123,hello:world ]
+id:123
+hello:world
+#
+```
 
+### Sample man pages
 
-Be sure to:
+```
+$ djk man join
+join is a RecordPipe.  
 
-* Edit your repository description on GitHub
+Joins the LEFT_SRC with the keyed RIGHT_SRC acccording to HOW.
+The keyed right source defines which fields comprise the KEY.
+
+syntax:
+
+LEFT_SRC RIGHT_SRC join:HOW
+
+where:
+
+HOW = left | right | inner | outer | FIELD (type=STRING)
+left = a left outer join (the decoration case)
+right = a right outer join.  Unmatched right records come last.
+inner = an inner join
+outer = full outer join
+FIELD = a boolean valued field to be added to the left record reflecting whether there was a right hit.
+
+e.g. join:left
+
+examples:
+
+example 1$ djk [ id:1,tx:0 ] [ id:1,color:red id:2,color:blue ] map:id join:left
+id:1
+tx:0
+color:red
+#
+
+example 2$ djk [ id:1,tx:0 ] [ id:1,color:red id:2,color:blue ] map:id join:right
+id:1
+tx:0
+color:red
+#
+id:2
+color:blue
+#
+
+example 3$ djk [ id:1,tx:0 id:2,tx:1 ] [ id:1,color:red id:2,color:blue ] map:id join:inner
+id:1
+tx:0
+color:red
+#
+id:2
+tx:1
+color:blue
+#
+```
 
 ## Security
 
