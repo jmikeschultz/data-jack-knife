@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 #########################################################################
 # initialization
@@ -26,7 +26,7 @@ LOG_DIR="-Dlog.dir=/tmp"
 
 # Check if DJK_MEM_SIZE is set
 if [ -z "$DJK_NUM_MEGABYTES" ]; then
-    DJK_NUM_MEGABYTES="1000"
+    DJK_NUM_MEGABYTES="4000"
 fi
 
 # ${log.dir} and ${runby} used in djk-log4j.xml

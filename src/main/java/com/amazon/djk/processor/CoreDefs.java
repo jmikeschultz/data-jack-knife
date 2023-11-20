@@ -98,7 +98,7 @@ public class CoreDefs extends FieldDefs {
         setCoreIntProperty(NUM_SORT_THREADS, numSourceThreads.get(), true);
         setCoreIntProperty(DOUBLE_PRINT_PRECISION, DEFAULT_DOUBLE_PRECISION, true);
         setCoreIntProperty(REPORT_REFRESH_SECS, 3, true);
-        setCoreProperty(FIELD_NAME_RULES, FieldNameRules.ENFORCE_REGEX.toString(), true);
+        setCoreProperty(FIELD_NAME_RULES, FieldNameRules.RELAXED_REGEX.toString(), true);
         setCoreProperty(DISPLAY_TYPE, Display.DisplayType.DEFAULT.toString(), true);
         initialized.set(true);
     }

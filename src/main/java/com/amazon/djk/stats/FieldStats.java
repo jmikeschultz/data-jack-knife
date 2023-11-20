@@ -66,7 +66,14 @@ public abstract class FieldStats<T> {
 	        		aCount.get() > bCount.get() ? -1 : 1;
 	        }
 	    });
-	        
+
+		double entropy = 0.0;
+		for (AtomicLong al : items.values()) {
+			double pX = al.doubleValue() / (double)numValues.get();
+			entropy += pX * Math.log(pX) / Math.log(2);
+		}
+		rec.addField(StatFields.STATS_ENTROPY, entropy * -1);
+
 	    Record numerical = getNumericalStatsAsRecord();
 	    if (numerical != null) {
 	        rec.addFields(numerical);

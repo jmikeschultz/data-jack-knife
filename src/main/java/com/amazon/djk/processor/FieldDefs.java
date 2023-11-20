@@ -36,9 +36,9 @@ public class FieldDefs {
     protected final AtomicReference<FieldNameRules> fieldNameRules = new AtomicReference<FieldNameRules>();
 
     public enum FieldNameRules {
-        ENFORCE_REGEX(0), // field names must adhere to legalFieldNamePattern
+        STRICT_REGEX(0), // field names must adhere to legalFieldNamePattern
         CONVERT_TO_UNDERBAR(1), // illegal characters will be converted to underbar
-        ALL_BUT_COLON(2); // all but colon characters will be allowed
+        RELAXED_REGEX(2); // space and dash converted to underbar
 
         private final int intValue;
         private FieldNameRules(int intValue) {
@@ -52,7 +52,7 @@ public class FieldDefs {
                 }
             }
 
-            return ENFORCE_REGEX;
+            return RELAXED_REGEX;
         }
     }
 
@@ -134,27 +134,31 @@ public class FieldDefs {
     		return LOCAL_FIELD_TYPE_ID;
     	}
 
+        if (fieldNameRules.get() == FieldNameRules.RELAXED_REGEX) {
+            name = name.replaceAll("[- ]", "_");
+        }
+
     	Matcher m = legalFieldNamePattern.matcher(name);
     	if (!m.matches()) {
     	    switch (fieldNameRules.get()) {
-                case ENFORCE_REGEX:
+                case STRICT_REGEX:
                     throw new IllegalFieldException(String.format("illegal field name='%s'. Must match regex='%s'. Consider using '%s' property.\n" +
                             "unix> export %s={%s or %s or %s}; djk [ hello:world ]\n" +
                             "unix> djk %s=%s\\; [ hello:world ]",
                             name, legalFieldNamePattern.toString(), CoreDefs.FIELD_NAME_RULES, // first line
                             CoreDefs.FIELD_NAME_RULES, // second line
-                            FieldNameRules.ENFORCE_REGEX.toString(), // second line
+                            FieldNameRules.STRICT_REGEX.toString(), // second line
                             FieldNameRules.CONVERT_TO_UNDERBAR.toString(), // second line
-                            FieldNameRules.ALL_BUT_COLON.toString(), // second line
-                            CoreDefs.FIELD_NAME_RULES, FieldNameRules.ENFORCE_REGEX.toString() // third line
+                            FieldNameRules.RELAXED_REGEX.toString(), // second line
+                            CoreDefs.FIELD_NAME_RULES, FieldNameRules.RELAXED_REGEX.toString() // third line
                             ));
 
-                case CONVERT_TO_UNDERBAR:
+                case CONVERT_TO_UNDERBAR: // converts all illegal chars to underbar
                     name = illegalFieldCharsRegex.matcher(name).replaceAll("_");
                     break;
 
-                case ALL_BUT_COLON:
-                    name = name.replace(':', '_'); // non regex
+                case RELAXED_REGEX: // converts space and dash to underbar DEFAULT
+                    // cannot happen
                     break;
             }
     	}

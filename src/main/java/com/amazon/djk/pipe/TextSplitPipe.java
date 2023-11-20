@@ -12,6 +12,7 @@ import com.amazon.djk.manual.Description;
 import com.amazon.djk.manual.Example;
 import com.amazon.djk.manual.ExampleType;
 import com.amazon.djk.record.Field;
+import com.amazon.djk.record.Pair;
 import com.amazon.djk.record.FieldIterator;
 import com.amazon.djk.record.Fields;
 import com.amazon.djk.record.Record;
@@ -26,9 +27,9 @@ import java.io.IOException;
 public class TextSplitPipe extends RecordPipe {
     private final static String TEXT_FIELD = "text";
 	private final static String FIELD_FIELD = "field";
-    private static final String CHILD = "child";
+    private static final String CHILD_PAIR = "child";
     private static final String WITH_FIELD = "withField";
-    private static final String DEFAULT_CHILD_FIELD = "term";
+    private static final String DEFAULT_CHILD_FIELD = "term:text";
     private static final String DEFAULT_WITH_FIELD_PARAM = "false";
     private static final String INPUTS = "INPUTS";
 
@@ -41,7 +42,8 @@ public class TextSplitPipe extends RecordPipe {
 	private final UTF8BytesRef stringRef = new UTF8BytesRef();
 	private final UTF8BytesRef tokenRef = new UTF8BytesRef();
     private final Record subrec = new Record();
-    private final Field child;
+    private final String child;
+    private final String childField;
     private final boolean withField;
     
     public TextSplitPipe(TextSplitPipe root, OpArgs args) throws IOException {
@@ -49,7 +51,9 @@ public class TextSplitPipe extends RecordPipe {
         this.args = args;
         this.fields = (Fields)args.getArg(INPUTS);
         this.fiter = fields.getAsIterator();
-        this.child = (Field)args.getParam(CHILD);
+        String[] childPair = ((String)args.getParam(CHILD_PAIR)).split(":");
+        this.child = childPair[0];
+        this.childField = childPair[1];
         this.withField = (Boolean)args.getParam(WITH_FIELD);
     }
     
@@ -70,7 +74,7 @@ public class TextSplitPipe extends RecordPipe {
 
                 while (stringRef.nextWhitespaceToken(tokenRef)) {
                     subrec.reset();
-                    subrec.addField(TEXT_FIELD, tokenRef);
+                    subrec.addFieldTyped(childField, tokenRef.getAsString());
                     if (withField) {
                         subrec.addField(FIELD_FIELD, fiter.getName());
                     }
@@ -81,7 +85,7 @@ public class TextSplitPipe extends RecordPipe {
             else { // else NonString
                 String temp = fiter.getValueAsString();
                 subrec.reset();
-                subrec.addField(TEXT_FIELD, temp);
+                subrec.addFieldTyped(childField, temp);
                 if (withField) {
                     subrec.addField(FIELD_FIELD, fiter.getName());
                 }
@@ -95,7 +99,7 @@ public class TextSplitPipe extends RecordPipe {
     @Description(text={"Txtsplit assumes white-spaced tokenization on the input text fields.",
     		"For each field in FIELDS it adds child record 'term' with fields 'text' and 'field'"})
     @Arg(name=INPUTS, gloss="comma separated list of fields to tokenize.", type=ArgType.FIELDS, eg="title")
-    @Param(name= CHILD, gloss="name of child record.", type=ArgType.FIELD, defaultValue = DEFAULT_CHILD_FIELD)
+    @Param(name= CHILD_PAIR, gloss="name of child record and field.", type=ArgType.STRING, defaultValue = DEFAULT_CHILD_FIELD)
     @Param(name= WITH_FIELD, gloss="if true the source field is added to the child record.", type=ArgType.BOOLEAN, defaultValue = DEFAULT_WITH_FIELD_PARAM)
     @Example(expr="[ title:'colorless green ideas',brand:chomsky ] txtsplit:title,brand", type=ExampleType.EXECUTABLE)
     public static class Op extends PipeOperator {

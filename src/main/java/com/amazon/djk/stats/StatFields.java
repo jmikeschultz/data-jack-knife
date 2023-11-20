@@ -24,4 +24,5 @@ public class StatFields {
     public final static String STATS_AVE = "valueAve";
     public final static String STATS_STDEV = "valueStdev";
     public final static String STATS_VARIANCE = "valueVariance";
+    public final static String STATS_ENTROPY = "valueEntropy";
 }
