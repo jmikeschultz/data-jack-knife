@@ -20,7 +20,7 @@ import java.io.IOException;
 
 
 @ReportFormats(headerFormat="<fields>%s")
-public class FlattenPipe extends RecordPipe {
+public class PopPipe extends RecordPipe {
     private static final String INPUTS = "SUBS";
     @ScalarProgress(name="fields")
 	final Fields fields;
@@ -33,7 +33,7 @@ public class FlattenPipe extends RecordPipe {
 	 * @param args
 	 * @throws IOException
 	 */
-	public FlattenPipe(OpArgs args) throws IOException {
+	public PopPipe(OpArgs args) throws IOException {
 	    this(null, args);
 	}
 
@@ -43,7 +43,7 @@ public class FlattenPipe extends RecordPipe {
 	 * @param args
 	 * @throws IOException
 	 */
-    public FlattenPipe(FlattenPipe root, OpArgs args) throws IOException {
+    public PopPipe(PopPipe root, OpArgs args) throws IOException {
         super(root);
         this.args = args;
         fields = (Fields)args.getArg(INPUTS);
@@ -52,7 +52,7 @@ public class FlattenPipe extends RecordPipe {
     
     @Override
     public Object replicate() throws IOException {
-    	return new FlattenPipe(this, args);
+    	return new PopPipe(this, args);
     }
 
     @Override
@@ -72,19 +72,19 @@ public class FlattenPipe extends RecordPipe {
         return rec;
     }
     
-   @Description(text={"Flattens sub-records into the parent. Fields are effectively moved from the sub-record to the parent,",
+   @Description(text={"Pop pops sub-records into the parent. Fields are effectively moved from the sub-record to the parent,",
 		   "so if there are multiple instances of a sub-record, there will be multiple instances of the flattened fields.",
 		   "If a SUB represents a field instead of a sub-record, it will be removed.  See also 'denorm'."})
    @Arg(name=INPUTS, gloss="the sub-records to flatten into the parent", type=ArgType.FIELDS)
    @Example(expr="[ color:blue,sub:[id:1,size:big] ] flatten:sub", type=ExampleType.EXECUTABLE)
    public static class Op extends PipeOperator {
        public Op() {
-           super("flatten:SUBS");
+           super("pop:SUBS");
        }
            
        @Override
        public RecordPipe getAsPipe(ParserOperands operands, OpArgs args) throws IOException, SyntaxError {
-           return new FlattenPipe(args).addSource(operands.pop());
+           return new PopPipe(args).addSource(operands.pop());
        }
    }
 }
